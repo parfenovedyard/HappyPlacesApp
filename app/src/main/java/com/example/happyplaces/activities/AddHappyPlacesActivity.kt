@@ -18,7 +18,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.happyplaces.R
+import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityAddHappyPlacesBinding
+import com.example.happyplaces.models.HappyPlaceModel
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -52,13 +54,14 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         dateSetListener = DatePickerDialog.OnDateSetListener {
-                _, year, month, dayOfMonth ->
+                view, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
             cal.set(Calendar.MONTH, month)
             cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
             updateDateInView()
         }
+        updateDateInView()
         binding.etDate.setOnClickListener(this)
         binding.tvAddImage.setOnClickListener(this)
         binding.btnSave.setOnClickListener(this)
@@ -89,7 +92,44 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 pictureDialog.show()
             }
             R.id.btn_save ->{
-                // save data model
+                when{
+                    binding.etTitle.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlacesActivity,
+                            "Please enter title", Toast.LENGTH_SHORT).show()
+                    }
+                    binding.etDescription.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlacesActivity,
+                            "Please enter a description", Toast.LENGTH_SHORT).show()
+                    }
+                    binding.etLocation.text.isNullOrEmpty() -> {
+                        Toast.makeText(this@AddHappyPlacesActivity,
+                            "Please enter a location", Toast.LENGTH_SHORT).show()
+                    }
+                    saveImageToInternalStorage == null -> {
+                        Toast.makeText(this@AddHappyPlacesActivity,
+                            "Please select an image", Toast.LENGTH_SHORT).show()
+                    } else -> {
+                        val happyPlaceModel = HappyPlaceModel(
+                            0,
+                            binding.etTitle.text.toString(),
+                            saveImageToInternalStorage.toString(),
+                            binding.etDescription.text.toString(),
+                            binding.etDate.text.toString(),
+                            binding.etLocation.text.toString(),
+                            mLatitude,
+                            mLongitude
+                        )
+                    val dbHandler = DatabaseHandler(this)
+                    val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
+
+                    if (addHappyPlace > 0) {
+                        Toast.makeText(this,
+                            "The happy place details are inserted successfully", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    }
+                }
+
             }
         }
     }
