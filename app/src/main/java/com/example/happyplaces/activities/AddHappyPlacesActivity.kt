@@ -1,4 +1,4 @@
-package com.example.happyplaces
+package com.example.happyplaces.activities
 
 import android.Manifest
 import android.app.Activity
@@ -16,8 +16,8 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Gallery
 import android.widget.Toast
+import com.example.happyplaces.R
 import com.example.happyplaces.databinding.ActivityAddHappyPlacesBinding
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -36,6 +36,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityAddHappyPlacesBinding
     private var cal = Calendar.getInstance()
     private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
+    private var saveImageToInternalStorage : Uri? = null
+    private var mLatitude: Double = 0.0
+    private var mLongitude: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +61,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         }
         binding.etDate.setOnClickListener(this)
         binding.tvAddImage.setOnClickListener(this)
+        binding.btnSave.setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -84,6 +88,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
+            R.id.btn_save ->{
+                // save data model
+            }
         }
     }
 
@@ -96,7 +103,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     try {
                         val selectedImageBitmap =
                             MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
-                        val saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
+                        saveImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
                         Log.e("Saved image", "Path :: $saveImageToInternalStorage")
                         binding.ivPlaceImage.setImageBitmap(selectedImageBitmap)
                     } catch (e: IOException) {
@@ -107,7 +114,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 }
             } else if(requestCode == CAMERA){
                 val thumbnail: Bitmap = data!!.extras!!.get("data") as Bitmap
-                val saveImageToInternalStorage = saveImageToInternalStorage(thumbnail)
+                saveImageToInternalStorage = saveImageToInternalStorage(thumbnail)
                 Log.e("Saved image", "Path :: $saveImageToInternalStorage")
                 binding.ivPlaceImage.setImageBitmap(thumbnail)
             }

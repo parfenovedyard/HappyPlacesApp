@@ -15,11 +15,11 @@
         android:theme="@style/Theme.HappyPlaces">
 
         <activity
-            android:name=".AddHappyPlacesActivity"
+            android:name=".activities.AddHappyPlacesActivity"
             android:screenOrientation="portrait"
             android:label="ADD HAPPY PLACE"
             android:theme="@style/CustomNoActionBarTheme"/>
-        <activity android:name=".MainActivity"
+        <activity android:name=".activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
