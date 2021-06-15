@@ -13,6 +13,7 @@ import com.example.happyplaces.adapters.HappyPlacesAdapter
 import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityMainBinding
 import com.example.happyplaces.models.HappyPlaceModel
+import com.example.happyplaces.utils.SwipeToDeleteCallback
 import pl.kitek.rvswipetodelete.SwipeToEditCallback
 
 class MainActivity : AppCompatActivity() {
@@ -53,6 +54,17 @@ class MainActivity : AppCompatActivity() {
         val editItemTouchHelper = ItemTouchHelper(editSwipeHandler)
         editItemTouchHelper.attachToRecyclerView(binding.rvHappyPlacesList)
 
+        val deleteSwipeHandler = object : SwipeToDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = binding.rvHappyPlacesList.adapter as HappyPlacesAdapter
+                adapter.removeAt(viewHolder.adapterPosition)
+
+                getHappyPlacesListFromDB()
+            }
+        }
+
+        val deleteItemTouchHelper = ItemTouchHelper(deleteSwipeHandler)
+        deleteItemTouchHelper.attachToRecyclerView(binding.rvHappyPlacesList)
     }
 
     private fun getHappyPlacesListFromDB() {
