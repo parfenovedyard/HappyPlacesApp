@@ -1,6 +1,7 @@
 package com.example.happyplaces.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
@@ -9,10 +10,12 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
+import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -22,6 +25,7 @@ import com.example.happyplaces.R
 import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityAddHappyPlacesBinding
 import com.example.happyplaces.models.HappyPlaceModel
+import com.google.android.gms.location.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
@@ -50,6 +54,8 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mHappyPlacesDetails : HappyPlaceModel? = null
 
+    private lateinit var mFusedLocationClient : FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddHappyPlacesBinding.inflate(layoutInflater)
@@ -60,6 +66,8 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         binding.tbAddPlace.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         if (!Places.isInitialized()) {
             Places.initialize(this@AddHappyPlacesActivity, resources.getString(R.string.google_maps_key))
@@ -107,6 +115,24 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         val locationManager : LocationManager= getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+    @SuppressLint("MissingPermission")
+    private fun requestNewLocationsData() {
+         var mLocationRequest = LocationRequest()
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        mLocationRequest.interval = 1000
+        mLocationRequest.numUpdates = 1
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+    }
+
+    private val mLocationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult?) {
+            val mLastLocation: Location = locationResult!!.lastLocation
+            mLatitude = mLastLocation.latitude
+            Log.i("Current latitude", "$mLatitude")
+            mLongitude = mLastLocation.longitude
+            Log.i("Current longitude", "$mLongitude")
+        }
     }
 
     override fun onClick(v: View?) {
@@ -211,12 +237,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     ).withListener(object : MultiplePermissionsListener {
                         override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                             if (report!!.areAllPermissionsGranted()) {
-
-                                Toast.makeText(
-                                    this@AddHappyPlacesActivity,
-                                    "Location permission is granted. Now you can request for a current location.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                requestNewLocationsData()
                             }
                         }
 
