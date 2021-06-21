@@ -25,6 +25,7 @@ import com.example.happyplaces.R
 import com.example.happyplaces.database.DatabaseHandler
 import com.example.happyplaces.databinding.ActivityAddHappyPlacesBinding
 import com.example.happyplaces.models.HappyPlaceModel
+import com.example.happyplaces.utils.GetAddressFromLatLng
 import com.google.android.gms.location.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -132,6 +133,18 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             Log.i("Current latitude", "$mLatitude")
             mLongitude = mLastLocation.longitude
             Log.i("Current longitude", "$mLongitude")
+
+            val addressTask = GetAddressFromLatLng(this@AddHappyPlacesActivity, mLatitude, mLongitude)
+            addressTask.setAddressListener(object: GetAddressFromLatLng.AddressListener{
+                override fun onAddressFound(address: String?){
+                    binding.etLocation.setText(address)
+                }
+                override fun onError() {
+                    Log.e("Get Address", "Something went wrong")
+                }
+            })
+            addressTask.gerAddress()
+            
         }
     }
 
